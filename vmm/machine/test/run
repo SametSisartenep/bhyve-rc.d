@@ -1,0 +1,15 @@
+#!/bin/sh
+name=test
+id=3
+mem=2048
+ncpu=1
+fbw=1024
+fbh=768
+bhyve -AHPw -s0:0,hostbridge \
+	-s1:0,lpc \
+	-s2:0,virtio-net,tap$id \
+	-s3:0,virtio-blk,/dev/zvol/zroot/${name}disk \
+	-l com1,/dev/nmdm${id}A \
+	-s29,fbuf,tcp=127.0.0.1:$((5900+$id)),w=$fbw,h=$fbh \
+	-l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
+	-c $ncpu -m $mem $name >>/vmm/machine/$name/log/out 2>>/vmm/machine/$name/log/err

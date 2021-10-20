@@ -1,0 +1,17 @@
+#!/bin/sh
+name=linux
+id=1
+mem=4096
+ncpu=4
+fbw=1920
+fbh=1080
+bhyve -AHPw -s0:0,hostbridge \
+	-s1:0,lpc \
+	-s2:0,virtio-net,tap$id \
+	-s3:0,virtio-blk,/dev/zvol/zroot/${name}disk \
+	-s16:0,hda,play=/dev/dsp,rec=/dev/dsp \
+	-l com1,/dev/nmdm${id}A \
+	-s29,fbuf,tcp=127.0.0.1:$((5900+$id)),w=$fbw,h=$fbh \
+	-s30,xhci,tablet \
+	-l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
+	-c $ncpu -m $mem $name >>/vmm/machine/$name/log/out 2>>/vmm/machine/$name/log/err

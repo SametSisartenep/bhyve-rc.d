@@ -1,0 +1,57 @@
+#!/bin/sh
+#
+# $AntaresLabs$
+#
+
+# PROVIDE: bhyve_test
+# REQUIRE: DAEMON FILESYSTEMS
+# KEYWORD: nojail shutdown
+
+. /etc/rc.subr
+
+vmname=test
+name="bhyve_${vmname}"
+desc="Bhyve - ${vmname} VM"
+rcvar="${name}_enable"
+start_cmd="bhyve_start"
+stop_cmd="bhyve_stop"
+status_cmd="bhyve_status"
+extra_commands="status"
+
+load_rc_config $name
+: ${bhyve_test_enable:=NO}
+
+runvm()
+{
+	local rc=0
+
+	while [ $rc -eq 0 ];do
+		/vmm/machine/${vmname}/run
+		rc=$?
+	done
+}
+
+bhyve_start()
+{
+	runvm &
+}
+
+bhyve_status()
+{
+	local pid=$(ps axo pid,command | egrep "${vmname}.*\\(bhyve\\)" | awk '{print $1}')
+
+	if [ ! -z $pid ];then
+		echo $name is running with pid $pid. 2>&1
+		return 0
+	else
+		echo $name is not running.
+	fi
+}
+
+bhyve_stop()
+{
+	local pid=$(ps axo pid,command | egrep "${vmname}.*\\(bhyve\\)" | awk '{print $1}')
+	kill -TERM $pid
+}
+
+run_rc_command "$1"
