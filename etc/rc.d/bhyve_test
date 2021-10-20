@@ -3,13 +3,13 @@
 # $AntaresLabs$
 #
 
-# PROVIDE: bhyve_coeus
+# PROVIDE: bhyve_test
 # REQUIRE: DAEMON FILESYSTEMS
 # KEYWORD: nojail shutdown
 
 . /etc/rc.subr
 
-vmname=coeus
+vmname=test
 name="bhyve_${vmname}"
 desc="Bhyve - ${vmname} VM"
 rcvar="${name}_enable"
@@ -19,7 +19,7 @@ status_cmd="bhyve_status"
 extra_commands="status"
 
 load_rc_config $name
-: ${bhyve_coeus_enable:=NO}
+: ${bhyve_test_enable:=NO}
 
 runvm()
 {
@@ -41,10 +41,10 @@ bhyve_status()
 	local pid=$(ps axo pid,command | egrep "${vmname}.*\\(bhyve\\)" | awk '{print $1}')
 
 	if [ ! -z $pid ];then
-		echo $name is running with pid $pid. 2>&1
+		echo $name is running with pid $pid. 1>&2
 		return 0
 	else
-		echo $name is not running.
+		echo $name is not running. 1>&2
 	fi
 }
 
